@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Claude Code 로컬 설정 (개인 권한·경로)
+.claude/settings.local.json
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs / temp
+*.log
+*.tmp
+
+# 작업 데이터 — 사용자 사적 자료, git 추적 안 함 (폴더 구조 유지를 위해 .gitkeep만 추적)
+tasks/*
+!tasks/.gitkeep
+# 공개 샘플 task (실제 작업을 익명화)
+!tasks/worker-smoke-test/
+!tasks/scheduler-misfire-analysis/
+!tasks/source-highlight-fix/
+
+# 프로젝트 특화 교훈 — 작성자 사적 누적물, git 추적 안 함 (폴더만 유지)
+_local/*
+!_local/.gitkeep

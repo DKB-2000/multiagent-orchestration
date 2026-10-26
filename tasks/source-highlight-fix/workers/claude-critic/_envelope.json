@@ -1,0 +1,10 @@
+{
+  "status": "error",
+  "exit_code": 1,
+  "backend": "cli",
+  "model": "host-default",
+  "duration_s": 1,
+  "stdout": "",
+  "stderr_sanitized": "error: unknown option '--prompt\r'\n",
+  "fallback_used": true
+}
