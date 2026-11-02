@@ -3,7 +3,7 @@
 ## 메타
 
 ```yaml
-status: done  # codex-main 리뷰 완료 + 발견사항 중 사용자 선택 항목(1,2,6) 반영 완료
+status: done  # codex-critic 리뷰 완료 + 발견사항 중 사용자 선택 항목(1,2,6) 반영 완료
 created: 2026-09-17
 updated: 2026-09-18
 priority: medium
@@ -27,7 +27,7 @@ FlowView(노드 우클릭 "소스 보기")·RuleRefControl("연관맵" 소스보
 - [x] 하이라이트 시 대상 줄이 뷰 맨 위에 붙던 것을 2줄 아래로 내려 보이게 스크롤 조정(`ScrollToLineWithContext`)
 - [x] `RuleRefControl.OpenSource`: 라인 파싱 실패해도 패널은 열리도록 예외 처리 분리 (단계별 try/catch 로깅은 사용자가 이후 의도적으로 제거 — 현재는 빈 catch, 최종 확정 상태)
 - [x] `RuleRefControl.OpenSource`가 "View 소스보기를 먼저 눌러야만 동작하는" 근본 원인(프로그램 편집기의 `FlowAndSourceContent(true)` 지연 초기화로 `sourceControl`이 null) 규명 및 `EnsureSourceControlReady` 콜백으로 수정
-- [x] codex-main 리뷰 반영: `FlowAndSourceContent.Disposed`에서 자신이 가리키는 경우에만 `EnsureSourceControlReady` 정리, `OpenSource`의 콜백 호출 try/catch + `IsDisposed` 가드 추가, `FlowView.cs`의 `SelectLine` 직전 중복 `CurrentLine` 대입 제거
+- [x] codex-critic 리뷰 반영: `FlowAndSourceContent.Disposed`에서 자신이 가리키는 경우에만 `EnsureSourceControlReady` 정리, `OpenSource`의 콜백 호출 try/catch + `IsDisposed` 가드 추가, `FlowView.cs`의 `SelectLine` 직전 중복 `CurrentLine` 대입 제거
 - [x] 위 모든 변경을 V2/비-V2 두 저장소에 동일 적용
 
 ## Worker Plan
@@ -35,20 +35,14 @@ FlowView(노드 우클릭 "소스 보기")·RuleRefControl("연관맵" 소스보
 ```yaml
 # 구현은 오케스트레이터가 직접 (워커 미사용). 완료 후 사용자 요청으로 리뷰만 워커 호출.
 workers_approved:
-  - worker: claude-critic
+  - worker: codex-critic
     approved_at: 2026-09-18
-    purpose: 오케스트레이터가 직접 구현한 소스 하이라이트/RuleRefControl 수정 리뷰
-    approved_by: user
-    write_scope: none
-    result: 실패 — call_worker.sh 디스패처 인프라 버그(아래 Notes 참조)로 호출 자체가 안 됨
-  - worker: codex-main
-    approved_at: 2026-09-18
-    purpose: claude-critic 실패 후 사용자가 지정한 대체 리뷰어 (mcp__codex__codex 직접 호출, 디스패처 미경유)
+    purpose: 오케스트레이터가 직접 구현한 소스 하이라이트/RuleRefControl 수정 리뷰 (mcp__codex__codex 직접 호출, 디스패처 미경유)
     approved_by: user
     write_scope: none
 
 planned_workers:
-  - role: codex-main
+  - role: codex-critic
     purpose: 구현 완료 후 독립 리뷰 (비평 모드, read-only sandbox)
 ```
 
@@ -67,10 +61,9 @@ target_repo (동일 적용):
 
 ## Notes
 
-- **claude-critic 디스패처 실패 원인(2026-09-18)**: (1) `backends.json`의 claude-critic `args_template`이 `["--prompt", @brief_content]`인데 실제 `claude` CLI에는 `--prompt` 플래그가 없음(`-p`/`--print` + positional prompt가 맞음). (2) `call_worker.sh`의 `while IFS= read -r a; do ... done <<<"$args_json"` 루프가 `jq -r` 멀티라인 출력을 줄 단위로 읽는데, 이 환경의 Windows `jq.exe`가 CRLF(`\r\n`)를 내보내는 것을 `xxd`로 직접 확인함 — `read -r`은 `\n`만 구분자로 보고 `\r`은 안 지워서 모든 cli 타입 워커의 모든 args_template 토큰 끝에 `\r`가 붙어버림(claude-critic 한정 아님, gemini 등 cli 타입 전체 영향). 이번 task 범위 밖이라 `_shared/` 인프라 파일은 고치지 않고 사용자에게 보고만 함 — 별도 task로 다룰 것.
 - 이 task 폴더는 작업 완료 후 **소급 작성**됨 — 사용자가 "오케스트레이터 직접 호출(워커 미사용)의 경우도 작업 문서를 남겨야 한다"고 2026-09-18에 정책을 확정(기존 메모리의 "문서화 생략" 방침을 뒤집음). `log.md`의 타임스탬프는 실제 발화 시각이 아니라 대화 흐름상 추정치.
 - `target_repo`가 V2인지 비-V2인지 세션 내내 혼선이 있었음(사용자가 중간에 "비-V2 쓰고 있어"라고 직접 정정) — 상세 히스토리는 오케스트레이터 메모리 참조.
-- **codex-main 리뷰 발견사항 중 미반영(보류) 항목** — `workers/codex-main/result.md` 참조, 필요 시 후속 task로:
+- **codex-critic 리뷰 발견사항 중 미반영(보류) 항목** — `workers/codex-critic/result.md` 참조, 필요 시 후속 task로:
   - `_lineHighlightBandLine`이 `SqlText`(문서) 교체 시 초기화 안 됨 — 다른 문서에 대해 `RemoveLineBackColor` 호출될 수 있음
   - `RemoveLineBackColor`가 이 기능이 아닌 다른 기능이 설정한 줄 배경색까지 지울 수 있음(소유권 미구분) — 동일 EditControl 내 다른 `SetLineBackColor` 사용처 전수조사 필요
   - `FormatManager`를 강조할 때마다 새로 생성(캐싱 안 함) — 성능상 치명적은 아니나 불필요한 할당

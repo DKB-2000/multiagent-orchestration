@@ -22,14 +22,8 @@
 [2026-09-18 01:20] [DECISION] 수정: RuleRefControl에 EnsureSourceControlReady(Action) 콜백 추가, FlowAndSourceContent.RuleRefControl 세터에서 this.InitSourceControl을 매번 덮어써서 연결(공유 싱글턴 ruleRefCtl이라 이벤트(+=) 대신 단일 델리게이트로 구독 누적/누수 회피). OpenSource() 진입 시 콜백 호출 후 sourceControl null 체크.
 [2026-09-18 01:30] [DECISION] 사용자 요청으로 이번 세션 전체(오케스트레이터 직접 호출) 작업 문서화 정책을 "생략"에서 "작성"으로 변경 확정. 이 task 폴더를 소급 작성.
 [2026-09-18 01:30] [COMPLETE] FlowView/RuleRefControl 소스보기 라인 하이라이트 개선 완료. 최종 색상: 디버그 #EEC8BD, 일반/RuleRef/인코딩변경 #C9E5F7(파란 채도 상향 후보 #B8DFF9는 미확정). V2/비-V2 두 저장소 동일 적용. 재빌드는 사용자가 직접 진행 예정.
-[2026-09-18 09:32] [APPROVAL] claude-critic 사용자 승인(AskUserQuestion, write_scope: none) — 오케스트레이터 직접 구현분 리뷰 목적
-[2026-09-18 09:32] [WORKER_CALL] claude-critic 호출 (call_worker.sh, isolated_tmp, timeout 300s) — brief: workers/claude-critic/brief.md
-[2026-09-18 09:33] [ERROR] claude-critic 호출 실패(exit 1). stderr: "error: unknown option '--prompt
-'". 두 가지 인프라 버그 추정: (1) backends.json의 claude-critic args_template이 ["--prompt", @brief_content]인데 실제 claude CLI에는 --prompt 플래그가 없음(claude --help 기준 -p/--print + positional prompt) (2) call_worker.sh의 while read -r a 루프가 jq -r 출력의 각 줄을 읽는데, Windows jq가 CRLF를 내보내는 것으로 보여 각 arg 끝에 
-가 붙어 옵션명이 --prompt
- 로 깨짐(모든 cli 타입 워커 args_template 공통 영향 가능). 코드 리뷰 작업과 무관, 사용자에게 보고.
-[2026-09-18 09:34] [APPROVAL] codex-main 사용자 승인 — claude-critic 디스패처 실패 후 대체 리뷰어로 지정, mcp__codex__codex 직접 호출(native, 디스패처 미경유)
-[2026-09-18 09:38] [VERIFICATION] codex-main 리뷰 완료(1차 read-only 실패 → PowerShell 접근 거부로 파일 직접 못 읽음, 2차 코드 인라인 재요청으로 성공). 치명적 1건(기존 버그: CurrentLine getter 무한재귀, 이번 변경과 무관), 높음 4건(델리게이트 폐기 인스턴스 참조 위험, IsDisposed 미검사, 빈 catch 은폐 - 로깅 제거 회귀 지적), 중간 7건, 낮음 3건. output_format(텍스트 응답, 수정 없음) 준수 확인, write_scope none 준수(코드 수정 안 함) 확인.
+[2026-09-18 09:34] [APPROVAL] codex-critic 사용자 승인(write_scope: none) — 오케스트레이터 직접 구현분 리뷰 목적, mcp__codex__codex 직접 호출(native, 디스패처 미경유)
+[2026-09-18 09:38] [VERIFICATION] codex-critic 리뷰 완료(1차 read-only 실패 → PowerShell 접근 거부로 파일 직접 못 읽음, 2차 코드 인라인 재요청으로 성공). 치명적 1건(기존 버그: CurrentLine getter 무한재귀, 이번 변경과 무관), 높음 4건(델리게이트 폐기 인스턴스 참조 위험, IsDisposed 미검사, 빈 catch 은폐 - 로깅 제거 회귀 지적), 중간 7건, 낮음 3건. output_format(텍스트 응답, 수정 없음) 준수 확인, write_scope none 준수(코드 수정 안 함) 확인.
 [2026-09-18 09:41] [DECISION] 사용자 지시: 리뷰 발견사항 중 1,2,6만 반영(3번 로깅 제거는 사용자가 의도적으로 한 것이라 유지). 적용: (1) FlowAndSourceContent에 Disposed 이벤트 훅 추가 — 자신이 EnsureSourceControlReady를 아직 가리키고 있을 때만 null로 정리(다음 MDI 전환이 이미 덮어썼으면 손 안 댐). (2) RuleRefControl.OpenSource: EnsureSourceControlReady 호출을 try/catch로 감싸고, sourceControl null 체크에 IsDisposed 추가. (6) FlowView.cs node/box 두 분기에서 SelectLine 직전의 중복 CurrentLine 대입 2줄씩 제거(SelectLine이 내부에서 ScrollToLineWithContext로 다시 처리하므로 무의미했음). V2/비-V2 두 저장소 동일 적용.
 [2026-09-18 09:41] [COMPLETE] 리뷰 대응 완료(1,2,6 반영 / 3은 사용자 의도 확인되어 미반영 / 4,5,7,9,11,12,13,14,15는 보류 — 필요시 별도 판단). 최종 상태로 task 종료.
 [2026-09-18 09:49] [COMPLETE] 사용자 확인으로 task 최종 완료 처리. task.md Acceptance Criteria 전항목 체크, status: done. 보류 항목은 task.md Notes에 목록화(후속 task 필요 시 참조).

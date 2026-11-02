@@ -99,6 +99,7 @@ run_backend() {
     cmd+=("$command_bin")
     args_json="$(jq -r '.cli.args_template[]' <<<"$spec")"   # jq 실패 시 set -e 트리거
     while IFS= read -r a; do
+      a="${a%$'\r'}"   # Windows jq.exe의 -r 멀티라인 출력은 CRLF — 토큰 끝 \r 제거
       case "$a" in
         "@brief")         cmd+=("$BRIEF");;
         "@brief_content") cmd+=("$(cat -- "$BRIEF")");;
@@ -154,9 +155,11 @@ run_backend() {
   ) >"$out" 2>"$err" || rc=$?
   dur=$(( $(date +%s) - start ))
 
-  local status="ok"
+  local status="ok" ret="$rc"
   [ "$rc" -ne 0 ] && status="error"
   [ "$rc" -eq 124 ] && status="timeout"
+  # exit 0이어도 stdout이 공백뿐이면 실패 처리 (예: agy 헤드리스 권한 자동 거부). exit_code는 실제 값 유지
+  if [ "$rc" -eq 0 ] && ! grep -q '[^[:space:]]' "$out"; then status="empty"; ret=1; fi
 
   redact <"$err" >"$errd"
   jq -n --arg status "$status" --argjson exit "$rc" \
@@ -164,7 +167,7 @@ run_backend() {
         --argjson dur "$dur" --arg backend "$ctype" --arg model "$model" \
         '{status:$status, exit_code:$exit, backend:$backend, model:$model,
           duration_s:$dur, stdout:$stdout, stderr_sanitized:$stderr}'
-  return "$rc"
+  return "$ret"
 }
 
 # primary → 실패 시 fallbacks 순차 (set -e 우회: || prc=$?)

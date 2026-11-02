@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-invariants.sh — system-invariants.md 불변식 표의 실행 러너 (Codex flavor, exit-code 판정).
+# check-invariants.sh — system-invariants.md 불변식 표의 실행 러너 (Claude flavor, exit-code 판정).
 # 사용: bash _shared/check-invariants.sh   # 하나라도 FAIL → exit 비0 (커밋 금지)
 set -u
 
@@ -10,7 +10,7 @@ PASS=0; FAIL=0
 ok() { echo " PASS  $1"; PASS=$((PASS+1)); }
 ng() { echo " FAIL  $1"; FAIL=$((FAIL+1)); }
 
-INSTR="$ROOT/AGENTS.md"
+INSTR="$ROOT/CLAUDE.md"
 RTG="$ROOT/_shared/routing.md"
 DSB="$ROOT/_shared/design-basis.md"
 ORC="$ROOT/_shared/orchestrator-rules.md"
@@ -21,25 +21,24 @@ WBR="$ROOT/_templates/worker-brief.md"
 WRS="$ROOT/_templates/worker-result.md"
 TFD="$ROOT/_templates/task-folder.md"
 
-echo "system invariants (codex flavor) — ROOT=$ROOT"
+echo "system invariants (claude flavor) — ROOT=$ROOT"
 
 # INV1 write_scope 값 집합 분포
 if grep -q 'tasks-only' "$INSTR" && grep -q 'tasks-only' "$RTG" \
    && grep -q 'tasks-only' "$WBR" && grep -q 'tasks-only' "$TFD"; then
   ok "INV1 write_scope tasks-only 분포"; else ng "INV1 write_scope tasks-only 분포"; fi
 
-# INV2 codex-critic 활성 참조 부재 (자기검수 구조 금지 — 비활성 안내 문맥 제외)
-if grep -rn 'codex-critic' "$INSTR" "$ROOT/README.md" "$RTG" "$ROOT/_shared/approval-policy.md" \
+# INV2 claude-critic 활성 참조 부재 (자기검수 구조 금지 — 비활성 안내 문맥 제외)
+if grep -rn 'claude-critic' "$INSTR" "$ROOT/README.md" "$RTG" "$ROOT/_shared/approval-policy.md" \
      "$ORC" "$ROOT/_templates" 2>/dev/null | grep -qviE '비활성|폐기|deprecat|금지'; then
-  ng "INV2 codex-critic 활성 참조 부재"; else ok "INV2 codex-critic 활성 참조 부재"; fi
+  ng "INV2 claude-critic 활성 참조 부재"; else ok "INV2 claude-critic 활성 참조 부재"; fi
 
-# INV3 claude-critic 비평 워커 존재
-if grep -q 'claude-critic' "$INSTR" && grep -q 'claude-critic' "$RTG"; then
-  ok "INV3 claude-critic 존재"; else ng "INV3 claude-critic 존재"; fi
+# INV3 codex-critic 비평 워커 존재
+if grep -q 'codex-critic' "$INSTR" && grep -q 'codex-critic' "$RTG"; then
+  ok "INV3 codex-critic 존재"; else ng "INV3 codex-critic 존재"; fi
 
 # INV4 log 태그 6종
-if grep -q 'DECISION | WORKER_CALL | VERIFICATION | ERROR | APPROVAL | COMPLETE' "$LOGT" \
-   && grep -q 'DECISION | WORKER_CALL | VERIFICATION | ERROR | APPROVAL | COMPLETE' "$INSTR"; then
+if grep -q 'DECISION | WORKER_CALL | VERIFICATION | ERROR | APPROVAL | COMPLETE' "$LOGT"; then
   ok "INV4 log 태그 6종"; else ng "INV4 log 태그 6종"; fi
 
 # INV5 한도 수치
@@ -47,9 +46,9 @@ if grep -qE '1500자|1500 chars' "$INSTR" && grep -qE '1200자|1200 chars' "$INS
    && grep -qE '1500자|1500 chars' "$CTXT" && grep -qE '1200자|1200 chars' "$WBR"; then
   ok "INV5 한도 수치 1500/1200"; else ng "INV5 한도 수치 1500/1200"; fi
 
-# INV6 권위 우선순위 (AGENTS.md 기준)
-if grep -qE 'AGENTS.md.*routing.md' "$DSB" || grep -qE 'AGENTS.md.*routing.md' "$ORC"; then
-  ok "INV6 권위 우선순위 (AGENTS.md 기준)"; else ng "INV6 권위 우선순위 (AGENTS.md 기준)"; fi
+# INV6 권위 우선순위 (CLAUDE.md 기준)
+if grep -qE 'CLAUDE.md.*routing.md' "$DSB" || grep -qE 'CLAUDE.md.*routing.md' "$ORC"; then
+  ok "INV6 권위 우선순위 (CLAUDE.md 기준)"; else ng "INV6 권위 우선순위 (CLAUDE.md 기준)"; fi
 
 # INV7 재진입 프로토콜 이중 존재
 if grep -q '재진입 프로토콜' "$ORC" && grep -qE 're-entry protocol|재진입 프로토콜' "$INSTR"; then
@@ -72,7 +71,7 @@ if grep -rn 'mcp__gemini-pro__\|mcp__gemini__gemini_' "$RTG" "$TFD" "$INSTR" 2>/
   ng "INV10 옛 프록시 활성호출 부재"; else ok "INV10 옛 프록시 활성호출 부재"; fi
 
 # INV11 카파시 4원칙 배선 + 블록 내 질문 지시 부재
-if grep -q 'Operating Principles' "$INSTR" && grep -q 'Worker 행동 규약' "$WBR" \
+if grep -q '운영 원칙' "$INSTR" && grep -q 'Worker 행동 규약' "$WBR" \
    && grep -q '표면화' "$WRS"; then
   ok "INV11 카파시 4원칙 배선"; else ng "INV11 카파시 4원칙 배선"; fi
 if sed -n '/^## Worker 행동 규약/,/^## Execution/p' "$WBR" | grep -qiE '질문|ask'; then

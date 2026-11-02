@@ -7,7 +7,7 @@ status: pending
 # 가능한 값:
 #   pending          작업 정의 완료, 시작 전
 #   in_progress      orchestrator 작업 진행 중
-#   waiting_<role>   특정 worker 응답 대기 (예: waiting_claude-critic)
+#   waiting_<role>   특정 worker 응답 대기 (예: waiting_codex-critic)
 #   reviewing        worker 결과 검증 중
 #   done             완료
 created: <YYYY-MM-DD>
@@ -35,17 +35,17 @@ priority: medium  # high | medium | low
 # 모든 worker는 사용 전 승인 필요. 비어있으면 호출 금지.
 workers_approved: []
 # 승인 예시:
-# - worker: claude-critic
+# - worker: codex-critic
 #   approved_at: <YYYY-MM-DD>
-#   purpose: Codex 산출물 리뷰·비평
+#   purpose: 산출물 독립 리뷰·비평
 #   approved_by: user
 
 # routing.md 참조하여 최소 set만 명시. 기본은 빈 배열.
 planned_workers: []
 # 예시:
-# - role: codex-main
+# - role: claude-main
 #   purpose:
-# - role: claude-critic
+# - role: codex-critic
 #   purpose:
 # - role: gemini
 #   purpose:

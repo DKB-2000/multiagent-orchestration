@@ -1,12 +1,12 @@
 # Orchestrator Rules
 
-Codex 세션이 MultiAgent Orchestrator로 동작할 때 지켜야 할 규칙이다. 각 항목은 세션 시작 또는 작업 재진입 시 자체 점검 대상이다.
+Claude Code 세션이 MultiAgent Orchestrator로 동작할 때 지켜야 할 규칙이다. 각 항목은 세션 시작 또는 작업 재진입 시 자체 점검 대상이다.
 
 ---
 
 ## 1. Orchestrator 실행 환경
 
-MultiAgent Orchestrator는 `<설치한-폴더>` 또는 그 하위에서 실행되는 Codex 세션이다.
+MultiAgent Orchestrator는 `<설치한-폴더>` 또는 그 하위에서 실행되는 Claude Code 세션이다.
 
 세션 시작 시 자체 점검:
 
@@ -18,12 +18,12 @@ MultiAgent Orchestrator는 `<설치한-폴더>` 또는 그 하위에서 실행�
 
 ## 2. 시스템 수정·검증 프로토콜
 
-**적용 조건**: 이번 작업이 시스템 파일 — `AGENTS.md`, `_shared/*`, `_templates/*` — 을 수정하거나 검증하는 작업일 때만 이 절을 적용한다. 일반 작업에서는 아래 파일들을 상시 로드하지 않는다.
+**적용 조건**: 이번 작업이 시스템 파일 — `CLAUDE.md`, `_shared/*`, `_templates/*` — 을 수정하거나 검증하는 작업일 때만 이 절을 적용한다. 일반 작업에서는 아래 파일들을 상시 로드하지 않는다.
 
 **절차**:
 
 1. `_shared/design-basis.md`를 읽는다.
-2. 수정한다. 권위 우선순위: `AGENTS.md` > `_shared/routing.md`·`approval-policy.md`·`orchestrator-rules.md` > `_templates/*`.
+2. 수정한다. 권위 우선순위: `CLAUDE.md` > `_shared/routing.md`·`approval-policy.md`·`orchestrator-rules.md` > `_templates/*`.
 3. `_shared/system-invariants.md`의 자가 점검 스크립트를 실행한다.
 4. 깨지면 고치거나, 의도된 변경이면 `design-basis.md`와 `system-invariants.md`를 함께 갱신한다.
 

@@ -5,7 +5,7 @@ Operating Principles (4원칙)
 ----------------------------
 
 The "운영 원칙 (Operating Principles)" section in the orchestrator instruction
-file (CLAUDE.md / AGENTS.md) reproduces, verbatim, the behavioral guidelines
+file (CLAUDE.md) reproduces, verbatim, the behavioral guidelines
 from:
 
   - Source:  https://github.com/multica-ai/andrej-karpathy-skills (CLAUDE.md)
@@ -48,13 +48,11 @@ MIT License notice for the borrowed guidelines text:
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 
-Base system and monitoring tool
--------------------------------
+Base system
+-----------
 
 This repository started from multi-agent-starter and was extended afterwards.
-The bundled `monitoring/` directory is based on mat (MultiAgent Tracker).
 
   - multi-agent-starter: https://github.com/netwaif/multi-agent-starter
-  - mat:                 https://github.com/netwaif/mat
   - Author:  netwaif
-  - License: MIT (see LICENSE and monitoring/LICENSE)
+  - License: MIT (see LICENSE)

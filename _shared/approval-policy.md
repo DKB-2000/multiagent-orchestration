@@ -2,12 +2,12 @@
 
 ## 원칙
 
-**모든 worker 호출은 작업별로 명시적 승인 필요** (`codex-main`, `claude-critic`, `gemini` 전체 pool 적용).
+**모든 worker 호출은 작업별로 명시적 승인 필요** (`claude-main`, `codex-critic`, `ollama`, `gemini` 전체 pool 적용).
 `task.md`의 `workers_approved` 리스트에 없으면 호출 금지.
 
-**예외**: Codex Orchestrator의 내부 추론은 worker 호출이 아니므로 승인 불필요. 다만 별도 `codex-main`, `claude-critic`, `gemini` worker 호출은 승인 대상이다.
+**예외**: Claude Code Orchestrator의 내부 추론은 worker 호출이 아니므로 승인 불필요. 다만 `claude-main` 등 서브에이전트 호출도 별도 모델 호출이므로 승인 대상이다.
 
-외부/유료 모델(`claude`, `gemini`, `openai`, `llm`, MCP/agent bridge 등)은 worker 승인과 별도로, 실제 호출 직전에 도구·모델·비용 가능성을 밝히고 사용자 승인을 받아야 한다.
+외부/유료 모델(`codex`, `gemini`, `openai`, `llm`, MCP/agent bridge 등)은 worker 승인과 별도로, 실제 호출 직전에 도구·모델·비용 가능성을 밝히고 사용자 승인을 받아야 한다.
 
 ## 승인 절차
 
@@ -32,8 +32,9 @@
 
 | Worker | 예상 비용 | 쿼터 부담 |
 |--------|-----------|-----------|
-| codex-main | 중간 | Codex 호출 쿼터 |
-| claude-critic | 중간 | Claude API/구독 쿼터 |
+| claude-main | 중간 | Claude 구독/API 쿼터 |
+| codex-critic | 중간 | Codex 호출 쿼터 |
+| ollama | 없음 | 벤더 쿼터 없음 (셀프 호스팅 자원) |
 | gemini flash | 낮음 | Gemini 쿼터 |
 | gemini pro | 중간-높음 | Gemini 쿼터 |
 
@@ -41,13 +42,13 @@
 
 ```yaml
 workers_approved:
-  - worker: codex-main
+  - worker: claude-main
     approved_at: <YYYY-MM-DD>
-    purpose: 구현 및 로컬 검증
+    purpose: 설계 문서 작성
     approved_by: user
-  - worker: claude-critic
+  - worker: codex-critic
     approved_at: <YYYY-MM-DD>
-    purpose: Codex 산출물 리뷰·비평
+    purpose: 산출물 독립 리뷰·비평
     approved_by: user
 ```
 

@@ -76,7 +76,6 @@ aliases: []               # 선택: 동의어·약칭
 
 ```bash
 cd "$KNOT_VAULT" && claude -p "schema.md와 prompts/ingest.md를 정독하고 그대로 실행하라"
-cd "$KNOT_VAULT" && codex exec "schema.md와 prompts/ingest.md를 정독하고 그대로 실행하라"
 cd "$KNOT_VAULT" && agy -p "schema.md와 prompts/ingest.md를 정독하고 그대로 실행하라"
 cd "$KNOT_VAULT" && gemini -p "schema.md와 prompts/ingest.md를 정독하고 그대로 실행하라"
 ```

@@ -11,7 +11,7 @@
 - git 액션 제한: 조회 전용(`diff`/`log`/`show`/`status`/`blame`/`branch -a`/`reflog`(조회만)/`fetch`)만 허용. 그 외(`pull`/`add`/`commit`/`push`/`checkout`/`reset`/`stash` 등) 수행 금지
 - 빌드 금지: 솔루션·프로젝트 빌드/컴파일 검증(MSBuild, javac, npm build 등) 수행 금지
 
-## Execution Context (codex-main / claude-critic 필수)
+## Execution Context (codex-critic 필수)
 
 ```yaml
 target_repo: /absolute/path/to/repo    # 작업 대상 절대 경로 (없으면 N/A)
@@ -53,6 +53,6 @@ sources: tasks/<task-name>/sources/<file>
 
 ```
 # 선행 worker 또는 Orchestrator 결과가 있으면 경로만 명시
-codex-main result: tasks/<task-name>/workers/codex-main/result.md
+claude-main result: tasks/<task-name>/workers/claude-main/result.md
 orchestrator artifact: tasks/<task-name>/artifacts/<file>
 ```

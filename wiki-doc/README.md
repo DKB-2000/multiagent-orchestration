@@ -10,13 +10,23 @@
 - 기계 검사: `python3 scripts/lint.py` (의존성 0, ERROR 시 exit 1)
 - Obsidian으로 열면 그래프 뷰 사용 가능(선택, `.obsidian/`은 git 제외)
 
+## 무엇을 넣는가
+
+다음 내용이 wiki-doc에 추가되어야 한다.
+
+1. DB 엔티티
+2. 프로그램 엔티티
+3. 반복되는 오류, 특이 동작
+4. 공유되어야 할 교훈
+
+쌓인 내용(`inbox/`·`raw/`·`wiki/`·`index.md`·`log.md`)은 git 추적 대상이 아니다(비공개).
+
 ## 사용
 
 소스(md·txt)를 `inbox/`에 넣고, 아무 벤더 CLI로 한 줄:
 
 ```bash
 cd "$KNOT_VAULT" && claude -p "schema.md와 prompts/ingest.md를 정독하고 그대로 실행하라"
-cd "$KNOT_VAULT" && codex exec "schema.md와 prompts/ingest.md를 정독하고 그대로 실행하라"
 cd "$KNOT_VAULT" && agy -p "schema.md와 prompts/ingest.md를 정독하고 그대로 실행하라"
 cd "$KNOT_VAULT" && gemini -p "schema.md와 prompts/ingest.md를 정독하고 그대로 실행하라"
 ```

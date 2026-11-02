@@ -18,7 +18,7 @@
 set -u
 
 # --- 설정 (env 또는 플래그로 주입; 번들에 사용자값을 박지 않는다) ---
-RUNNER="${KNOT_RUNNER:-agy}"        # agy(기본·권장) | claude | codex | gemini | 임의 CLI
+RUNNER="${KNOT_RUNNER:-agy}"        # agy(기본·권장) | claude | gemini | 임의 CLI
 MODEL="${KNOT_MODEL:-}"             # agy 등 per-call 모델 핀(비우면 러너 기본값)
 MAX_ITER="${KNOT_MAX_ITER:-25}"
 
@@ -27,7 +27,7 @@ while [ $# -gt 0 ]; do
     --runner)   RUNNER="$2"; shift 2 ;;
     --model)    MODEL="$2"; shift 2 ;;
     --max-iter) MAX_ITER="$2"; shift 2 ;;
-    -h|--help)  echo "사용: drain.sh [--runner agy|claude|codex|gemini] [--model <핀>] [--max-iter N]"; exit 0 ;;
+    -h|--help)  echo "사용: drain.sh [--runner agy|claude|gemini] [--model <핀>] [--max-iter N]"; exit 0 ;;
     *)          echo "알 수 없는 인자: $1" >&2; exit 2 ;;
   esac
 done
@@ -56,7 +56,6 @@ run_ingest() {
         agy --dangerously-skip-permissions --print-timeout 9m -p "$PROMPT"
       fi ;;
     claude) claude -p "$PROMPT" --dangerously-skip-permissions ;;
-    codex)  codex exec "$PROMPT" ;;
     gemini) gemini -p "$PROMPT" ;;
     *)      "$RUNNER" -p "$PROMPT" ;;
   esac

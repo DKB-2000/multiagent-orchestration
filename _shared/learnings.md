@@ -20,9 +20,9 @@
 
 <!-- 이 아래부터 교훈 추가 -->
 
-## [2026-06-01] [codex-fork]
-**교훈**: Codex가 Orchestrator인 fork에서는 산출물 리뷰 worker를 Codex 자기검수로 두지 말고 `claude-critic`으로 분리해야 독립 검토의 의미가 유지된다.
-**근거**: 사용자 결정에 따라 원본 MultiAgent의 critic 역할을 Codex 버전에 맞게 재설계했다.
+## [2026-06-01] [critic-design]
+**교훈**: 산출물 리뷰 worker는 Orchestrator와 같은 벤더의 자기검수로 두지 말고 교차 벤더 critic(`codex-critic`)으로 분리해야 독립 검토의 의미가 유지된다.
+**근거**: 사용자 결정에 따라 critic 역할을 교차 벤더 구조로 설계했다.
 **worker**: orchestrator
 
 ## [2026-08-23] [rest-export-feasibility]
@@ -91,13 +91,13 @@
 **worker**: orchestrator
 
 ## [2026-09-18] [source-highlight-fix]
-**교훈**: `claude-critic`(cli 타입) 워커 호출이 이 Windows 환경에서 전면 실패한다 — 두 가지 독립적 버그가 겹쳐 있다. (1) `backends.json`의 `claude-critic.cli.args_template`이 `["--prompt", "@brief_content"]`인데, 실제 `claude` CLI에는 `--prompt` 플래그가 없다(`claude --help` 기준 올바른 형태는 `-p`/`--print` + prompt를 positional 인자로). (2) `call_worker.sh`의 `while IFS= read -r a; do ... done <<<"$args_json"`(args_template 각 토큰을 jq로 뽑아 읽는 루프)가, 이 환경의 Windows `jq.exe`가 `-r` 멀티라인 출력에 CRLF(`\r\n`)를 쓰는 것과 맞물려 모든 토큰 끝에 `\r`가 붙는다(`echo '{"a":["x","y"]}' | jq -r '.a[]' | xxd`로 직접 확인, `78 0d 0a 79 0d 0a` = `x\r\ny\r\n`). `read -r`는 `\n`만 구분자로 보고 `\r`은 안 지우므로 `claude` CLI가 `--prompt\r`라는 존재하지도 않는 옵션으로 인식해 즉시 실패한다. **이 버그는 claude-critic 전용이 아니라 cli 타입 워커(gemini 포함) 전체의 args_template 처리에 공통으로 영향**을 준다. 워커 호출을 시도했는데 원인불명으로 즉시(1초 내) 실패하면, envelope의 `stderr_sanitized`에 인자 뒤에 이상한 문자가 붙어있는지부터 볼 것 — Windows/Git Bash 환경에서 jq를 통한 멀티라인 텍스트 추출은 CRLF 오염을 의심할 것.
-**근거**: claude-critic 리뷰 요청 시 exit_code=1, `stderr: "error: unknown option '--prompt\r'"`. `call_worker.sh`/`backends.json` 자체는 이번 task 범위 밖이라 고치지 않고 사용자에게 보고, 대체 워커(`mcp__codex__codex` 직접 호출, 디스패처 미경유)로 리뷰를 완료했다. `_shared/adapters/call_worker.sh`·`_shared/backends.json` 수정은 별도 task로 다룰 것.
+**교훈**: `claude` CLI를 쓰는 cli 타입 워커 호출이 이 Windows 환경에서 전면 실패한다 — 두 가지 독립적 버그가 겹쳐 있다. (1) `backends.json`의 해당 워커 `cli.args_template`이 `["--prompt", "@brief_content"]`인데, 실제 `claude` CLI에는 `--prompt` 플래그가 없다(`claude --help` 기준 올바른 형태는 `-p`/`--print` + prompt를 positional 인자로). (2) `call_worker.sh`의 `while IFS= read -r a; do ... done <<<"$args_json"`(args_template 각 토큰을 jq로 뽑아 읽는 루프)가, 이 환경의 Windows `jq.exe`가 `-r` 멀티라인 출력에 CRLF(`\r\n`)를 쓰는 것과 맞물려 모든 토큰 끝에 `\r`가 붙는다(`echo '{"a":["x","y"]}' | jq -r '.a[]' | xxd`로 직접 확인, `78 0d 0a 79 0d 0a` = `x\r\ny\r\n`). `read -r`는 `\n`만 구분자로 보고 `\r`은 안 지우므로 `claude` CLI가 `--prompt\r`라는 존재하지도 않는 옵션으로 인식해 즉시 실패한다. **이 버그는 특정 워커 전용이 아니라 cli 타입 워커(gemini 포함) 전체의 args_template 처리에 공통으로 영향**을 준다. 워커 호출을 시도했는데 원인불명으로 즉시(1초 내) 실패하면, envelope의 `stderr_sanitized`에 인자 뒤에 이상한 문자가 붙어있는지부터 볼 것 — Windows/Git Bash 환경에서 jq를 통한 멀티라인 텍스트 추출은 CRLF 오염을 의심할 것.
+**근거**: `claude` CLI 리뷰 워커 요청 시 exit_code=1, `stderr: "error: unknown option '--prompt\r'"`. `call_worker.sh`/`backends.json` 자체는 이번 task 범위 밖이라 고치지 않고 사용자에게 보고, 대체 워커(`mcp__codex__codex` 직접 호출, 디스패처 미경유)로 리뷰를 완료했다. `_shared/adapters/call_worker.sh`·`_shared/backends.json` 수정은 별도 task로 다룰 것.
 **worker**: orchestrator
 
 ## [2026-09-18] [source-highlight-fix] (codex-critic/`mcp__codex__codex` PowerShell 차단 — 2026-09-14 교훈의 재발 + 유효한 우회법)
 **교훈**: `mcp__codex__codex`를 `sandbox: read-only`로 호출하면 이 환경에서 PowerShell 프로세스 생성 자체가 `CreateProcessAsUserW failed: 5 (액세스 거부)`로 막혀, Codex가 절대경로를 알려줘도 파일을 스스로 Read하지 못하는 경우가 재현성 있게 발생한다(2026-09-14 `graph-migration`에 이어 두 번째 재현). **유효했던 우회법**: 파일 경로만 알려주고 Codex가 직접 읽게 하는 대신, Orchestrator가 리뷰 대상 코드를 직접 Read해서 그 내용을 `mcp__codex__codex-reply`의 `prompt`에 코드블록으로 그대로 인라인해서 보내면(같은 `threadId`로 이어서), 파일 접근 없이도 줄 번호·근거를 동반한 구체적인 리뷰를 정상적으로 받을 수 있다. 즉 이 환경에서 `mcp__codex__codex`에게 read-only 코드 리뷰를 시킬 때는 "경로만 주고 읽게 하기"보다 "Orchestrator가 대상 파일을 먼저 Read해서 brief/prompt에 직접 포함하기"를 기본 전략으로 삼을 것.
-**근거**: 1차 codex-main 리뷰 호출(`cwd`=대상 저장소 루트, `sandbox: read-only`)이 PowerShell 접근 거부로 실패, Codex가 일반론적 위험 목록만 반환. 5개 파일(약 200줄)을 직접 Read해 `codex-reply`에 인라인 전달한 2차 호출은 성공, 파일·줄 번호를 정확히 인용한 15건의 구체적 발견사항(치명적 1/높음 4/중간 7/낮음 3)을 받았다.
+**근거**: 1차 codex 리뷰 호출(`cwd`=대상 저장소 루트, `sandbox: read-only`)이 PowerShell 접근 거부로 실패, Codex가 일반론적 위험 목록만 반환. 5개 파일(약 200줄)을 직접 Read해 `codex-reply`에 인라인 전달한 2차 호출은 성공, 파일·줄 번호를 정확히 인용한 15건의 구체적 발견사항(치명적 1/높음 4/중간 7/낮음 3)을 받았다.
 **worker**: orchestrator
 
 ## [2026-09-22] [sql-perf-analysis]
@@ -149,3 +149,13 @@
 **교훈**: 워커·Orchestrator의 코드 판독 결함 중 여러 건이 사용자 테스트로 뒤집혔다(다른 체크아웃에서 이미 수정됨, 재현 불가, 설정이 실제로 무시됨). 보고 전에 (a) 실행 중인 빌드가 어느 체크아웃인지(스택 경로·HEAD 포함 관계), (b) DB에 남은 실행 기록, (c) 서버 기동 로그의 설정 경고를 대조하면 오판을 줄인다. 대조 못 한 항목은 '추정'으로 명시해 보고할 것.
 **근거**: 코드 판독 결함 중 여러 건이 사용자 테스트로 뒤집혔다 — 다른 체크아웃에서 이미 수정됨, 재현 불가, 커넥션 풀이 일부 설정을 실제로는 무시해 "풀 강제 회수" 가설 기각.
 **worker**: orchestrator
+
+## [2026-11-02] [codex-mcp-diagnosis] codex MCP가 CONNECTION_CLOSED면 CLI에 `mcp-server` 하위 명령이 아직 있는지부터 확인할 것
+**교훈**: `.mcp.json`의 codex 서버(`codex mcp-server`)가 `CONNECTION_CLOSED`로 실패하면 `codex --help`의 Commands 목록에 `mcp-server`가 있는지 먼저 본다. 없으면 인자가 프롬프트로 해석되어 TUI를 띄우려다 `Error: stdin is not a terminal`(exit 1)로 바로 끝난다. 이때는 `.mcp.json` 항목을 지우지 말고(codex-critic의 기본 통로이고 MCP가 복구되면 다시 쓴다) Bash에서 `codex exec`를 직접 호출하는 폴백으로 진행한다. 폴백에서는 `codex-reply`처럼 스레드를 이어갈 수 없으므로, 다시 요청할 때는 필요한 맥락을 프롬프트에 함께 넣는다.
+**근거**: codex-cli 0.165.0에서 `mcp-server`가 빠져 `/mcp` 재연결이 계속 실패했다. `codex mcp`(외부 MCP 관리용)와 `codex app-server`(Codex 전용 프로토콜)는 MCP 서버 모드를 대신할 수 없다.
+**worker**: codex-critic, orchestrator
+
+## [2026-11-02] [gemini-github-icon] agy(gemini) 헤드리스는 파일 읽기·웹 조회 모두 permissions.allow 규칙이 있어야 한다
+**교훈**: agy 헤드리스(print 모드)는 권한 프롬프트를 띄울 수 없다. 그래서 `command`(셸)·`read_file` 같은 도구를 쓰려 하면 자동으로 거부하고 빈 출력으로 끝난다(exit 0). `trustedWorkspaces`에 등록하는 것만으로는 읽기가 허용되지 않는다. 규칙은 `~/.gemini/antigravity-cli/settings.json`의 `permissions.allow`에 **glob이 아닌 절대경로 접두어**로 쓴다(`read_file(D:\...\tasks)` — `\**`를 붙이면 매칭이 안 된다). 이미지 판독은 Orchestrator가 이미지를 `tasks/<task>/artifacts/`에 받아 두고 절대경로로 넘기면 된다. 웹 fetch를 gemini에게 맡기지 말 것(셸 금지를 지시하면 300s 타임아웃). 디스패처는 이제 빈 stdout을 `status: "empty"`(비0 반환)로 판정한다. 그래도 실패 원인은 `stderr_sanitized`와 `~/.gemini/antigravity-cli/log/cli-*.log`의 "soft-denying" 줄에서 확인할 것.
+**근거**: 웹 fetch는 1차(command 거부, 빈 출력이 ok로 표시됨)와 2차(timeout)에서 실패했다. 이미지 판독은 3·4차가 read_file 거부로 실패했고, 4차는 `\**` 규칙이 로드됐는데도 매칭되지 않았다. 5차에 접두어 규칙으로 바꾼 뒤 성공했다(22s, 판독 정확).
+**worker**: gemini, orchestrator

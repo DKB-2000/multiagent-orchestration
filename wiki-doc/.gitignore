@@ -1,0 +1,13 @@
+.obsidian/
+.DS_Store
+.knot/
+
+# 쌓인 지식(내용)은 비공개 — 운영 틀(schema·prompts·scripts·README)만 추적
+inbox/*
+raw/*
+wiki/*
+!inbox/.gitkeep
+!raw/.gitkeep
+!wiki/.gitkeep
+index.md
+log.md

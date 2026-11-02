@@ -11,7 +11,7 @@
 |------|------|------|
 | `claude-main.md` | `claude-main` | strategist |
 
-> codex-main · codex-critic · gemini 는 `.claude/agents/` 파일이 아니라 MCP/CLI 로 호출된다
+> codex-critic · ollama · gemini 는 `.claude/agents/` 파일이 아니라 MCP/CLI/API 로 호출된다
 > (호출 스펙 정본: `_shared/backends.json`). Worker Pool 전체 목록은 `CLAUDE.md` Architecture 참조.
 
 **이 계층에 워커를 추가하려면** `_shared/capability-profile.md` §갱신 절차를 따른다 —
@@ -28,6 +28,8 @@
 | 파일 | name | 도메인 |
 |------|------|--------|
 | `frontend-expert.md` | `frontend-expert` | vanilla JS · jQuery · Bootstrap 기반 서버렌더링 프론트엔드 |
+| `backend-expert.md` | `backend-expert` | Java · Spring Boot 기반 서버 애플리케이션 |
+| `dba-expert.md` | `dba-expert` | Oracle · MySQL/MariaDB SQL·튜닝·스키마 (DB 직접 실행은 조회만) |
 
 **이 계층에 에이전트를 추가하려면** 이 표에 한 줄 추가하고 `.claude/agents/<name>.md` 를 둔다.
 정본 5개(Worker Pool 문서)는 건드리지 않는다.

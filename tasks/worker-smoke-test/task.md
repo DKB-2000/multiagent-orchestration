@@ -11,7 +11,7 @@ priority: low
 
 ## Goal
 
-담당 워커(claude-main, codex-main, codex-critic, ollama, gemini)가 실제로 이 환경에서 응답하는지 커넥티비티 확인.
+담당 워커(claude-main, codex-critic, ollama, gemini)가 실제로 이 환경에서 응답하는지 커넥티비티 확인.
 
 ## Constraints
 
@@ -22,8 +22,7 @@ priority: low
 ## Acceptance Criteria
 
 - [x] claude-main 응답 확인
-- [x] codex-main 응답 확인 (codex.exe 전체경로 호출, PATH 미등록 상태 — 사용자 승인된 방식)
-- [x] codex-critic 응답 확인 (동일 방식)
+- [x] codex-critic 응답 확인 (codex.exe 전체경로 호출, PATH 미등록 상태 — 사용자 승인된 방식)
 - [x] ollama 응답 확인 (call_worker.sh 디스패처)
 - [x] gemini는 사유 기록 후 스킵
 
@@ -34,10 +33,6 @@ workers_approved:
   - worker: claude-main
     approved_at: 2026-08-10
     purpose: 스모크테스트 — 응답 확인
-    approved_by: user
-  - worker: codex-main
-    approved_at: 2026-08-10
-    purpose: 스모크테스트 — 응답 확인 (codex.exe 전체경로 직접 호출)
     approved_by: user
   - worker: codex-critic
     approved_at: 2026-08-10
@@ -50,8 +45,6 @@ workers_approved:
 
 planned_workers:
   - role: claude-main
-    purpose: 응답 확인
-  - role: codex-main
     purpose: 응답 확인
   - role: codex-critic
     purpose: 응답 확인

@@ -1,4 +1,4 @@
-# codex-main 리뷰 결과 (mcp__codex__codex, thread 01a0b1ef-caa6-7b72-81a1-d2afdda7132e)
+# codex-critic 리뷰 결과 (mcp__codex__codex, thread 01a0b1ef-caa6-7b72-81a1-d2afdda7132e)
 
 호출 방식: `mcp__codex__codex` 직접 호출(native, `call_worker.sh` 디스패처 미경유), read-only sandbox, `cwd=<repo>`.
 

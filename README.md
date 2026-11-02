@@ -15,12 +15,11 @@ Claude Code 세션을 오케스트레이터로 두고, Claude·Codex·Gemini·Ol
   | 워커 | 역할(능력 슬롯) |
   |------|----------------|
   | `claude-main` | strategist — 기획·설계·디버깅 원인 분석 |
-  | `codex-main` | engineer — 대규모 구현·테스트·diff·로컬 검증 |
   | `codex-critic` | reviewer — 산출물 리뷰·비평 |
   | `ollama` | reviewer — 벤더 쿼터 없는 셀프 호스팅 보조 검증 |
   | `gemini` | multimodal — 이미지·긴 문서·제3자 시각 검토 |
 
-  슬롯→워커 배정 정본은 `_shared/capability-profile.md`(가변층). 신모델이 나오면 프로필만 갱신합니다.
+  engineer·computer-use 슬롯(구현·테스트·로컬 검증·브라우저 조작)은 Orchestrator가 직접 처리합니다. 슬롯→워커 배정 정본은 `_shared/capability-profile.md`(가변층). 신모델이 나오면 프로필만 갱신합니다.
 - **Memory = filesystem** — 런타임 상태가 없습니다. 모든 결정·승인·검증이 `tasks/<task>/` 아래 파일로 남습니다.
 
 ## 작업 흐름
@@ -35,8 +34,8 @@ Claude Code 세션을 오케스트레이터로 두고, Claude·Codex·Gemini·Ol
 
 ```
 .
-├── CLAUDE.md / AGENTS.md     # 오케스트레이터 운영 규칙 (Claude / Codex flavor)
-├── .claude/agents/           # ① 워커 풀(claude-main) + ② 도메인 서브에이전트(frontend-expert)
+├── CLAUDE.md                 # 오케스트레이터 운영 규칙
+├── .claude/agents/           # ① 워커 풀(claude-main) + ② 도메인 서브에이전트(frontend·backend·dba-expert)
 ├── _shared/
 │   ├── routing.md            # 워커 선택 decision tree
 │   ├── capability-profile.md # 능력 슬롯 → 워커 배정 (가변층)
@@ -48,8 +47,7 @@ Claude Code 세션을 오케스트레이터로 두고, Claude·Codex·Gemini·Ol
 │   └── adapters/             # call_worker.sh 디스패처 + 워커별 어댑터
 ├── _templates/               # task / brief / result / log 템플릿
 ├── tasks/                    # 작업 폴더 (git 비추적, 아래 샘플만 포함)
-├── knot-vault/               # 에이전트 공용 지식 vault (선택)
-└── monitoring/               # mat — 작업 진행 TUI 모니터 (netwaif/mat 기반)
+└── wiki-doc/                 # 에이전트 공용 지식 vault (선택)
 ```
 
 ## 샘플 task
@@ -79,11 +77,10 @@ Claude Code 세션을 오케스트레이터로 두고, Claude·Codex·Gemini·Ol
 
 - **Ollama 워커** — 벤더 쿼터 없이 돌릴 수 있는 셀프 호스팅 리뷰어 (`_shared/adapters/ollama_api.sh`)
 - **도메인 서브에이전트 계층** — 승인 게이트 대상인 워커 풀과 분리된 "실제 개발용" 에이전트 계층 (`.claude/agents/README.md`)
-- **flavor 전환 스크립트** — Claude 사용량 소진 시 Codex 오케스트레이터로 전환/복귀 (`_shared/switch-flavor.sh`)
 - **코드 주석 정책** — 워커가 반환한 코드의 주석을 오케스트레이터가 재검토하는 규칙 (`_shared/code-comment-policy.md`)
 - **운영 교훈 축적** — 실무 적용 중 겪은 실패·우회법 20여 건 (`_shared/learnings.md`)
   예: 워커의 자기 검증 서술을 신뢰하지 않고 `git diff`로 재검증, 두 워커 간 인터페이스 wire-type 불일치, Windows `jq` CRLF로 인한 CLI 워커 전면 실패, SQL 리라이트의 `MINUS` 양방향 검증
-- **knot-vault** — 여러 에이전트 CLI가 같이 읽고 쓰는 마크다운 지식 vault
+- **wiki-doc** — 여러 에이전트 CLI가 같이 읽고 쓰는 마크다운 지식 vault
 
 ## 사용 시작
 
